@@ -35,13 +35,6 @@ for (int i = 0; i <= 60; i++) {
     xbins[i] = pow(10, xmin + i*(xmax-xmin)/60);  // theta bins
     ybins[j] = pow(10, ymin + j*(ymax-ymin)/80);  // dm2 bins
 }
-  // for (int i = 0; i <= 60; i++) {
-  //   for (int j = 0; i <= 80; i++) {
-  //   double x_val = -4.0 + i * 60; // original center scale
-  //   double y_val = -2.0 + j * 80;
-
-    // xbins[i] = pow(10.0, x_val);  // 10^(-4) to 10^0
-    // ybins[j] = pow(10.0, y_val);  // 10^(-2) to 10^2
 }
  
     // Create a 2D histogram
@@ -53,21 +46,6 @@ for (int i = 0; i <= 60; i++) {
                         // 60, -4, 0,   // X bins
                         // 80, -2, 2);  // Y bins
 
- // Open CSV file
-//  std::ifstream csv("digitize-nature0.csv");
-//   std::vector<double> x, y;
-//     double xv, yv;
-//     char comma;
-// while (csv >> xv >> comma >> yv) {
-//   x.push_back(xv);
-//   y.push_back(yv);
-//     }
-
-// TGraph *g = new TGraph(x.size(), x.data(), y.data());
-// g->SetMarkerStyle(20);
-// g->SetMarkerSize(0.8);
-//   g->SetMarkerColor(kRed);
-// g->SetLineColor(kRed);
   
 double value = 0.05;
 
@@ -101,32 +79,42 @@ double value = 0.05;
         if (!file->IsDirectory() && fname.EndsWith(".root")) {
             TString fullpath = TString::Format("%s/%s", dirname, fname.Data());
             std::cout << "Processing " << fullpath << std::endl;
-	    TString exclpath = fullpath+".exclusion";
+	    TString exclpath = fullpath+".data";
+	    TString deltapath = fullpath+".deltachi2";
 	    // exclpath.ReplaceAll(".root", ".exclusion");
             TFile f(fullpath, "READ");
             if (!f.IsOpen()) {
                 std::cerr << "Cannot open file " << fullpath << std::endl;
                 continue;
             }
-            // TFile c(exclpath, "READ");
-            // if (!c.IsOpen()) {
-            //     std::cerr << "Cannot open file " << exclpath << std::endl;
-            //     continue;
-            // }
-
+            TFile c(exclpath, "READ");
+            if (!c.IsOpen()) {
+                std::cerr << "Cannot open file " << exclpath << std::endl;
+                continue;
+            }
+            TFile d(deltapath, "READ");
+            if (!c.IsOpen()) {
+                std::cerr << "Cannot open file " << exclpath << std::endl;
+                continue;
+            }
             // Retrieve parameter objects
             auto dm2 = (TParameter<double>*)f.Get("dm2_grid");
             auto theta = (TParameter<double>*)f.Get("theta_grid");
 	    auto numtoys = (TParameter<int>*)f.Get("num_toys");
-	    // auto chi2obs = (TParameter<double>*)c.Get("deltachi2_ref");
-	    auto chi2obs = (TParameter<double>*)f.Get("deltachi2_ref");
+	    auto chi2obs = (TParameter<double>*)c.Get("deltachi2_ref");
+	    // auto chi2obs = (TParameter<double>*)f.Get("deltachi2_ref");
+	    // auto chi2obs = (TParameter<double>*)f.Get("deltachi2_ref");
+	    TVectorD *obs = nullptr;
 	    TVectorD *v3v = nullptr;
 	    TVectorD *v4v = nullptr;
 	    f.GetObject("3v_deltachi2", v3v);   // name of the object inside the root file
 	    f.GetObject("4v_deltachi2", v4v);   // name of the object inside the root file
+	    // d.GetObject("deltachi2_obs", obs);   // name of the object inside the root file
             double x = theta->GetVal();
             double y = dm2->GetVal();
 	    double ref = chi2obs->GetVal();
+	    // double ref = (*obs)[0];
+	    // cout << ref << "\n";
 // double ref = 0.05;
 	    int toys = numtoys->GetVal();
 // TParameter<int>  num_toys;1
@@ -172,8 +160,8 @@ double value = 0.05;
     c->SetLogy();
     mendezstyle::WesZPalette(255);
     mendezstyle::CenterTitles(h2);
-// h2->Draw("axis");   // show bin text labels
-h2->SaveAs("ue4-chisquare.root");
+h2->Draw("axis");   // show bin text labels
+// h2->SaveAs("ue4-chisquare.root");
 // h2->SetTitle("#nu_{#mu} Disappearance Only;2|U_{e4}|^{2};#Delta m^{2}");
 // g->Draw("P Same");
 
@@ -181,14 +169,14 @@ h2->SaveAs("ue4-chisquare.root");
 //         gr->SetLineColor(kBlue);
 //         gr->SetLineStyle(1);
 //         gr->SetLineWidth(3);
-//         gr->Draw("L SAME");
+//         // gr->Draw("L SAME");
 // }
-// for (auto gr : contours) {
-//         contours[1]->SetLineColor(kBlue);
-//         contours[1]->SetLineWidth(3);
-        // contours[0]->Draw("L SAME");
-// contours[0]->SaveAs("../mendez-numu-exclusion-bnb-ue4.root");
-// }
+for (auto gr : contours) {
+        // contours[1]->SetLineColor(kBlue);
+        // contours[1]->SetLineWidth(3);
+        contours[0]->Draw("L SAME");
+contours[0]->SaveAs("../mendez-vanilla-numu-data-exc-psuedofix.root");
+}
 
       // TLegend * leg = MakeLegend(0.65, 0.6, 0.9, 0.75);
       // leg->Clear();
