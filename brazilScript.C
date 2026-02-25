@@ -163,7 +163,7 @@ void brazilScript(const char* dirname = "./") {
   }
   // Writing root file
   cout << "Writing root file \n";
-  TFile outfile("clsHeat.root", "RECREATE");
+  TFile outfile("clsHeat-fixed.root", "RECREATE");
 
   for (size_t i = 0; i < clsHeat.size(); ++i) {
     if (!clsHeat[i]) continue;
