@@ -47,18 +47,25 @@ void CollateAllRoot(const char* dirname = "./") {
       double y = dm2->GetVal();
       int gridx = static_cast<int>(x);
       int gridy = static_cast<int>(y);
+      cout << rootpath << endl;
+      cout << gridx << "," << gridy << endl;
+      cout << "Toys: " << toys << endl;
+      // gridv3v[gridx][gridy].ResizeTo(*v3v);
+      // gridv3v[gridx][gridy] = *v3v;
 
-      gridv3v[gridx][gridy] = *v3v;
-      gridv4v[gridx][gridy] = *v4v;
+      // gridv4v[gridx][gridy].ResizeTo(*v4v);
+      // gridv4v[gridx][gridy] = *v4v;
+      // gridv3v[gridx][gridy] = *v3v;
+      // gridv4v[gridx][gridy] = *v4v;
     }
   }
-  TFile outfile("deltachi2_grid.root", "RECREATE");
-  TTree tree("tree", "grids of deltachi2");
-  tree.Branch("gridv3v", &gridv3v);
-  tree.Branch("gridv4v", &gridv4v);
-  tree.Fill();          // single entry containing full grid
-  tree.Write();
-  outfile.Close();
+  // TFile outfile("deltachi2_grid.root", "RECREATE");
+  // TTree tree("tree", "grids of deltachi2");
+  // tree.Branch("gridv3v", &gridv3v);
+  // tree.Branch("gridv4v", &gridv4v);
+  // tree.Fill();          // single entry containing full grid
+  // tree.Write();
+  // outfile.Close();
 }
 
 
