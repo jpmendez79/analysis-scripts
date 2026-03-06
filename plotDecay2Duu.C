@@ -17,8 +17,20 @@ void plotDecay2Duu() {
     int xbins = 5000;
     int ybins = 5000;
     TH2D * h2 =
-    new TH2D("prob_ee",
+    new TH2D("prob_uu",
              "#nu_{#mu} #rightarrow #nu_{#mu} Disappearance Rel Diff; sin2_2theta_uu;g^{2};)",
+             xbins, sin2_2theta_uu_min, sin2_2theta_uu_max, ybins, g2_min, g2_max);
+    TH2D * h3 =
+    new TH2D("pos_prob_uu",
+             "#nu_{#mu} #rightarrow #nu_{#mu} Disappearance Positive Solution; sin2_2theta_uu;g^{2};)",
+             xbins, sin2_2theta_uu_min, sin2_2theta_uu_max, ybins, g2_min, g2_max);
+    TH2D * h4 =
+    new TH2D("neg_prob_uu",
+             "#nu_{#mu} #rightarrow #nu_{#mu} Disappearance Negative Solution; sin2_2theta_uu;g^{2};)",
+             xbins, sin2_2theta_uu_min, sin2_2theta_uu_max, ybins, g2_min, g2_max);
+    TH2D * h5 =
+    new TH2D("Uu4_prob_uu",
+             "#nu_{#mu} #rightarrow #nu_{#mu} Disappearance Negative Solution; sin2_2theta_uu;g^{2};)",
              xbins, sin2_2theta_uu_min, sin2_2theta_uu_max, ybins, g2_min, g2_max);
 
 
@@ -36,6 +48,13 @@ void plotDecay2Duu() {
   double lambda = Delta * ig2 / (4 * TMath::Pi());
   return 1 - 2*x*(1 - exp(-1 * lambda / 2) * cos_2Delta) + x*x*(1 - 2*exp(-1 * lambda / 2) * cos_2Delta +exp(-1 * lambda));
  };
+    auto uu4_prob_uu = [idm2, baseline](double sin2_2theta_ee, double ig2, double Enu) { 
+    double t = 2*sin2_2theta_ee;  // 2|Uu4|^2
+  double Delta = 1.267 * idm2 * baseline / Enu;
+  double cos_2Delta = cos(2*Delta);
+  double lambda = Delta * ig2 / (4 * TMath::Pi());
+  return 1 - t*(1 - exp(-1 * lambda / 2) * cos_2Delta) + (t*t/4)*(1 - 2*exp(-1 * lambda / 2) * cos_2Delta +exp(-1 * lambda));
+ };
 
   for (int i = 0; i <= xbins; i++) {
     double x2 = h2->GetXaxis()->GetBinCenter(i);
@@ -43,24 +62,32 @@ void plotDecay2Duu() {
       double y2 = h2->GetYaxis()->GetBinCenter(j);
       double pos_probuu_sum = 0;
       double neg_probuu_sum = 0;
+      double uu4_probuu_sum = 0;
       for (int k = 0; k < 6; k++ ) {
 	// 0.5 to 1.5 GeV every 0.2 GeV a point, in total 6 points
 	double energy = 500 + (k * 200);
 	// prob_sum += (1 - prob_ee(x, y, energy));
 	pos_probuu_sum += (1-pos_prob_uu(x2, y2, energy));
         neg_probuu_sum += (1-neg_prob_uu(x2, y2, energy));
+       uu4_probuu_sum += (1-uu4_prob_uu(x2, y2, energy));
       }
       double pos_avg_uu = pos_probuu_sum / 6;
       double neg_avg_uu = neg_probuu_sum / 6;
+      double uu4_avg_uu = uu4_probuu_sum / 6;
       // double prob = 1 - prob_ee(x, y);
          double avg_uu = (neg_avg_uu - pos_avg_uu) / pos_avg_uu;
          h2->SetBinContent(i, j, avg_uu);
+         h3->SetBinContent(i, j, pos_avg_uu);
+         h4->SetBinContent(i, j, neg_avg_uu);
+         h5->SetBinContent(i, j, uu4_avg_uu);
       // cout << prob;
     }
   }
-/* mendezstyle::WesZPalette(255); */
-/* mendezstyle::SymmetricPalette(); */
-mendezstyle::CVDPalette();
-h2->Draw("colz");
-
+mendezstyle::WesZPalette(255);
+// mendezstyle::SymmetricPalette();
+// mendezstyle::CVDPalette();
+// h2->Draw("colz");
+// h3->Draw("colz");
+// h4->Draw("colz");
+h5->Draw("colz");
 }
