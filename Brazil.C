@@ -8,20 +8,20 @@ TLegend * MakeLegend(float left=0.7, float bottom=0.5, float right=0.9, float to
 }
 
 void Brazil() {
-  // double xbins[61], ybins[81];
-  // double xmin = -2, xmax = 0;
-  // double ymin = -2, ymax = 2;
-  // // Construct log10 bin boundaries
-  // for (int i = 0; i <= 60; i++) {
-  //   for (int j = 0; j <= 80; j++) {
-  //     xbins[i] = pow(10, xmin + i*(xmax-xmin)/60);  // theta bins
-  //     ybins[j] = pow(10, ymin + j*(ymax-ymin)/80);  // dm2 bins
-  //   }
-  // }
+  double xbins[61], ybins[81];
+  double xmin = -2, xmax = 0;
+  double ymin = -2, ymax = 2;
+  // Construct log10 bin boundaries
+  for (int i = 0; i <= 60; i++) {
+    for (int j = 0; j <= 80; j++) {
+      xbins[i] = pow(10, xmin + i*(xmax-xmin)/60);  // theta bins
+      ybins[j] = pow(10, ymin + j*(ymax-ymin)/80);  // dm2 bins
+    }
+  }
   // TH2D* htemp = new TH2D("htemp", "Parameter Map;X;Y", 60, &xbins[0], 80, &ybins[0]);
 
 
-  TString senspath = "cls-sensitivity.root";
+  TString senspath = "sens-contours-pointThreshold.root";
   TFile s(senspath, "READ");
   const int num_universe = 1000;
   double dm2_val = 2;
@@ -32,23 +32,23 @@ void Brazil() {
   // double min = 1e6;
   // double max = 1e-6;
   for (int i=0; i<num_universe; i++) {
-    TString graph = TString::Format("universe_sens%i", i);
+    TString graph = TString::Format("sens-contour_%i", i);
     TGraph* sgr = nullptr;
     s.GetObject(graph, sgr);
     TGraph temp(sgr->GetN(), sgr->GetY(), sgr->GetX());
     double x = temp.Eval(dm2_val);
-    if (x>1) {
+    if (x>1 || x<0.01) {
       cout << "Unphysical theta: " << x << "\n";
     }
     else {
       xvals.push_back(temp.Eval(dm2_val));
     }
     // cout << temp.Eval(dm2_val) << end
-    // brazil->Fill(x);
+    /* brazil->Fill(x); */
   }
   s.Close();
   TString title = "95% CLs;sin^{2}2#theta_{#mu#mu};";
-  TH1D* brazil= new TH1D("brazil", title, 25, 0.01, 1);
+  TH1D* brazil= new TH1D("brazil", title, 60, &xbins[0]);
   brazil->FillN(num_universe, xvals.data(), w.data());
   double p[5] = {0.021, 0.157, 0.498, .839, .975};
   double q[5];
@@ -59,7 +59,7 @@ void Brazil() {
   cout << "Median: " << q[2] << "\n";
 
   std::sort(xvals.begin(),xvals.end());//Sorting the vector
-  xvals.erase( unique( xvals.begin(), xvals.end() ), xvals.end() );
+  /* xvals.erase( unique( xvals.begin(), xvals.end() ), xvals.end() ); */
   // cout << xvals.size() << "\n";
   int qv[5];
   for (int i=0; i<5; i++) {
