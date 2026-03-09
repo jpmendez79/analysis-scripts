@@ -39,21 +39,27 @@ void plotSens() {
   mendezstyle::WesZPalette(255);
   mendezstyle::CenterTitles(clsHeatRead[0]);
   clsHeatRead[0]->Draw("axis");   // show bin text labels
-TFile out("sens-contours-all.root", "RECREATE");
+int pointThreshold = 50;
+TFile out("sens-contours-pointThreshold.root", "RECREATE");
   for (int i=0; i<1000; i++) {
     auto contours = mendezstyle::GetContourGraphs(clsHeatRead[i], contour_level);
     for (auto gr : contours) {
-      gr->SetLineColor(kBlue);
-      gr->SetLineStyle(1);
-      gr->SetLineWidth(3);
+      int gIndex = 0;
+      int points = gr->GetN();
+      if (points <= pointThreshold) {
+	gIndex++;
+      }
+      // gr->SetLineColor(kBlue);
+      // gr->SetLineStyle(1);
+      // gr->SetLineWidth(3);
       // gr[0]->Draw("L SAME");
-      contours[0]->Draw("L SAME");
-      contours[0]->SetName(Form("sens-contour_%zu", i));
-      contours[0]->Write();
+      // contours[0]->Draw("L SAME");
+      contours[gIndex]->SetName(Form("sens-contour_%zu", i));
+      contours[gIndex]->Write();
     }
   }
-  c->Update();
+  // c->Update();
   out.Close();
-  c->SaveAs("allsens.png");
+  // c->SaveAs("allsens.png");
 }
 
