@@ -94,7 +94,7 @@ double value = 0.05;
             }
             TFile d(deltapath, "READ");
             if (!c.IsOpen()) {
-                std::cerr << "Cannot open file " << exclpath << std::endl;
+                std::cerr << "Cannot open file " << deltapath << std::endl;
                 continue;
             }
             // Retrieve parameter objects
@@ -103,17 +103,17 @@ double value = 0.05;
 	    auto numtoys = (TParameter<int>*)f.Get("num_toys");
 	    auto chi2obs = (TParameter<double>*)c.Get("deltachi2_ref");
 	    // auto chi2obs = (TParameter<double>*)f.Get("deltachi2_ref");
-	    // auto chi2obs = (TParameter<double>*)f.Get("deltachi2_ref");
+	    // auto chi2obs = (TParameter<double>*)d.Get("deltachi2_ref");
 	    TVectorD *obs = nullptr;
 	    TVectorD *v3v = nullptr;
 	    TVectorD *v4v = nullptr;
 	    f.GetObject("3v_deltachi2", v3v);   // name of the object inside the root file
 	    f.GetObject("4v_deltachi2", v4v);   // name of the object inside the root file
-	    // d.GetObject("deltachi2_obs", obs);   // name of the object inside the root file
+	    d.GetObject("deltachi2_obs", obs);   // name of the object inside the root file
             double x = theta->GetVal();
             double y = dm2->GetVal();
 	    double ref = chi2obs->GetVal();
-	    // double ref = (*obs)[0];
+	    // double ref = (*obs)[300];
 	    // cout << ref << "\n";
 // double ref = 0.05;
 	    int toys = numtoys->GetVal();
@@ -135,7 +135,8 @@ double value = 0.05;
 	    }   
 	    else z = count4v / count3v;
 	    if( count4v>=count3v ) z = 1;
-
+// Hack to look at delta chi2
+            z = ref;
 	  
             h2->SetBinContent(x, y, z);
 	    // if (z==0) cout << "zero," << x <<"," << y <<endl;
@@ -148,8 +149,8 @@ double value = 0.05;
 //     nature->SetLineColor(kBlue);
 //     nature->SetLineWidth(3);
     // Get contour line at z <= 0.05 --> level = 0.05
-    double contour_level = 0.05;
-    auto contours = mendezstyle::GetContourGraphs(h2, contour_level);
+    // double contour_level = 100;
+    // auto contours = mendezstyle::GetContourGraphs(h2, contour_level);
   // auto nature_contours = mendezstyle::GetContourGraphs(nature, contour_level);
   // Draw contour line
     // Draw result
@@ -160,23 +161,24 @@ double value = 0.05;
     c->SetLogy();
     mendezstyle::WesZPalette(255);
     mendezstyle::CenterTitles(h2);
-h2->Draw("axis");   // show bin text labels
+// h2->Draw("axis");   // show bin text labels
+h2->Draw("colz");
 // h2->SaveAs("ue4-chisquare.root");
 // h2->SetTitle("#nu_{#mu} Disappearance Only;2|U_{e4}|^{2};#Delta m^{2}");
 // g->Draw("P Same");
 
 // for (auto gr : contours) {
-//         gr->SetLineColor(kBlue);
+//         gr->SetLineColor(kGreen);
 //         gr->SetLineStyle(1);
 //         gr->SetLineWidth(3);
-//         // gr->Draw("L SAME");
+//         gr->Draw("L SAME");
 // }
-for (auto gr : contours) {
-        // contours[1]->SetLineColor(kBlue);
-        // contours[1]->SetLineWidth(3);
-        contours[0]->Draw("L SAME");
-contours[0]->SaveAs("../mendez-vanilla-numu-data-exc-psuedofix.root");
-}
+// for (auto gr : contours) {
+//         // contours[1]->SetLineColor(kBlue);
+//         // contours[1]->SetLineWidth(3);
+//         contours[0]->Draw("L SAME");
+// // contours[0]->SaveAs("../mendez-vanilla-numu-sens-psuedofix.root");
+// }
 
       // TLegend * leg = MakeLegend(0.65, 0.6, 0.9, 0.75);
       // leg->Clear();

@@ -9,7 +9,7 @@
 #include "MendezStyle.h"
 #include <fstream>
 void plotSens() {
-  TFile infile("clsHeat.root", "READ");
+  TFile infile("dir_root/clsHeat-fixed.root", "READ");
 
   std::vector<TH2D*> clsHeatRead;
 
@@ -34,29 +34,35 @@ void plotSens() {
   TCanvas* c = new TCanvas("c", "Results", 900, 800);
   double contour_level = 0.05;
   // nature->Draw("COLZ");
-  c->SetLogx();
-  c->SetLogy();
-  mendezstyle::WesZPalette(255);
-  mendezstyle::CenterTitles(clsHeatRead[0]);
-  clsHeatRead[0]->Draw("axis");   // show bin text labels
+  // c->SetLogx();
+  // c->SetLogy();
+  // mendezstyle::WesZPalette(255);
+  // mendezstyle::CenterTitles(clsHeatRead[0]);
+  // clsHeatRead[0]->Draw("axis");   // show bin text labels
 int pointThreshold = 50;
 TFile out("sens-contours-pointThreshold.root", "RECREATE");
-  for (int i=0; i<1000; i++) {
+for (int i=0; i<1000; i++) {
     auto contours = mendezstyle::GetContourGraphs(clsHeatRead[i], contour_level);
+    int graphIndex = 0;
     for (auto gr : contours) {
-      int gIndex = 0;
-      int points = gr->GetN();
-      if (points <= pointThreshold) {
-	gIndex++;
+      if (gr->GetN() < pointThreshold) {
+	graphIndex++;
       }
+      else {
+	break;
+      }
+    }
+    contours[graphIndex]->SetName(Form("sens-contour_%i", i));
+    contours[graphIndex]->Write();
+    cout << "Found Universe " << i << "in " << graphIndex << endl;
+
+    
       // gr->SetLineColor(kBlue);
       // gr->SetLineStyle(1);
       // gr->SetLineWidth(3);
       // gr[0]->Draw("L SAME");
       // contours[0]->Draw("L SAME");
-      contours[gIndex]->SetName(Form("sens-contour_%zu", i));
-      contours[gIndex]->Write();
-    }
+    
   }
   // c->Update();
   out.Close();
