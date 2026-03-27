@@ -1,11 +1,11 @@
 #include "MendezStyle.h"
 
 void SaveContours() {
-  TFile clsfile("cls_map-old.root", "READ");
-  TFile outfile("cls-sensitivity-old.root", "RECREATE");
-  int numUniverse = 10;
-  double contour_level = 0.005;
-  for (int universe = 1; universe <=1000; universe++) {
+  TFile clsfile("202603-cls_map.root", "READ");
+  TFile outfile("202603-alt005-map-.root", "RECREATE");
+  int numUniverse = 1000;
+  double contour_level = 0.05;
+  for (int universe = 1; universe <= numUniverse; universe++) {
     TH2D *uhist = nullptr;
     TString histname = TString::Format("clsHeat%i", universe);
     clsfile.GetObject(histname, uhist);

@@ -27,16 +27,20 @@ void SensStudy() {
   
   std::vector<TH2D*> clsHeat;
   for (int n=0; n<num_universe; n++) {
-    TH2D* h = new TH2D(Form("clsHeat%i",n+1), Form("Universe %i CLs Map;sin^{2}(2#theta_{#mu#mu});#Deltam^{2}_{41}",n+1),60, &xbins[0], 80, &ybins[0]);
+    TH2D* h = new TH2D(Form("clsHeat%i",n+1), Form("Universe %i #Delta#chi^{2} Map;sin^{2}(2#theta_{#mu#mu});#Deltam^{2}_{41}",n+1),60, &xbins[0], 80, &ybins[0]);
     clsHeat.push_back(h);
   }
   for (int xindex=0; xindex<=60; xindex++) {
     for (int yindex=0; yindex<=80; yindex++) {
+// cout << "Reading " << xindex << " " << yindex << endl;
       // Do this once per grid point
-      TString filepath = TString::Format("vanilla-numu_grid_60x80_sinsquare_theta_uu_%i_dm2_%i.root", xindex,yindex);
-      cout << "Reading " << filepath << "\n";
+      // TString filepath = TString::Format("202603-vanilla-numu/vanilla-numu_grid_60x80_sinsquare_theta_uu_%i_dm2_%i.root", xindex,yindex);
+      TString filepath = TString::Format("202603-vanilla-numu/202603-vanilla-numu-disappear-60x80-grid-sinsquare-twothetauu_%i-deltamsquare41_%i.root.probdist", xindex,yindex);
+// 202603-vanilla-numu-disappear-60x80-grid-sinsquare-twothetauu_9-deltamsquare41_79.root.probdist
+      // cout << "Reading " << filepath << "\n";
       TFile file(filepath, "READ");
-      auto numtoys = (TParameter<int>*)file.Get("num_toys");
+      // auto numtoys = (TParameter<int>*)file.Get("num_toys");
+      auto numtoys = (TParameter<int>*)file.Get("pdf_size");
       TVectorD *v3v = nullptr;
       TVectorD *v4v = nullptr;
       file.GetObject("3v_deltachi2", v3v);   // name of the object inside the root file
@@ -69,6 +73,7 @@ void SensStudy() {
 	}   
 	else z = count4v / count3v;
 	if( count4v>=count3v ) z = 1;
+	// clsHeat[universe-1]->SetBinContent(xindex,yindex,ref);
 	clsHeat[universe-1]->SetBinContent(xindex,yindex,z);
 	delete matrix;
       }
@@ -76,9 +81,12 @@ void SensStudy() {
       delete v3v;
       delete v4v;
     }
+cout << "Finished x bin " << xindex <<endl;
   }
-  TFile outfile("cls_map-old-copy.root", "RECREATE");
+  TFile outfile("202603-cls_map-setxiangpanscale.root", "RECREATE");
   for(auto h : clsHeat){
+   h->SetMinimum(0.6);
+   h->SetMaximum(1.); 
     h->Write();
     delete h;
   }

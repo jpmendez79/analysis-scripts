@@ -18,38 +18,43 @@ void Brazil() {
       ybins[j] = pow(10, ymin + j*(ymax-ymin)/80);  // dm2 bins
     }
   }
-  double dm2_val = 2;
+  double dm2_val = 40;
   vector<double> xvals;
   TH2D* htemp = new TH2D("htemp", "Parameter Map;X;Y", 60, &xbins[0], 80, &ybins[0]);
   TH1D* hsens = new TH1D("htemp", "95% CLs;sin^{2}2#theta_{#mu#mu};", 60, &xbins[0]);
-  TString senspath = "cls-sensitivity-old.root";
+  TString senspath = "202603-alt005-map.root";
   TFile s(senspath, "READ");
   const int num_universe = 1000;
   for (int i=1; i<=num_universe; i++) {
-    TString universepath = TString::Format("universe%i/contour0", i);
+    TString universepath = TString::Format("universe%i", i);
     /* cout << "Reading directory " << universepath << endl; */
-    /* TDirectory* dir = (TDirectory*)s.Get(universepath); */
-    TGraph *sgr = nullptr;
-    s.GetObject(universepath, sgr);
-    TGraph temp(sgr->GetN(), sgr->GetY(), sgr->GetX());
+    TDirectory* dir = (TDirectory*)s.Get(universepath);
+    /* TGraph *sgr = nullptr; */
+    /* s.GetObject("contour0", sgr); */
+    /* TGraph temp(sgr->GetN(), sgr->GetY(), sgr->GetX()); */
+    /* double x = temp.Eval(dm2_val); */
+    /* hsens->Fill(x); */
+    /* xvals.push_back(temp.Eval(dm2_val)); */
+    /* int badcount = 0; */
+    TIter next(dir->GetListOfKeys());
+    TKey* key;
+    while ((key = (TKey*)next())) {
+      TObject* obj = key->ReadObj();
+      TGraph* g = (TGraph*)obj;
+      if (g->GetN() >  50) {
+    TGraph temp(g->GetN(), g->GetY(), g->GetX());
     double x = temp.Eval(dm2_val);
     hsens->Fill(x);
     xvals.push_back(temp.Eval(dm2_val));
-    int badcount = 0;
-    /* TIter next(dir->GetListOfKeys()); */
-    /* TKey* key; */
-    /* while ((key = (TKey*)next())) { */
-    /*   TObject* obj = key->ReadObj(); */
-    /*   TGraph* g = (TGraph*)obj; */
-    /*   if (g->GetN() < 50) { */
-    /* 	badcount++; */
-    /*   } */
-    /* } */
+
+	/* badcount++; */
+      }
+    }
     /* cout << "Universe " << i << " " << badcount << " unphysical graphs" <<endl; */
   }
   /* hsens->Draw("colz"); */
   std::sort(xvals.begin(),xvals.end());//Sorting the vector
-  double p[5] = {0.021, 0.157, 0.498, .839, .975};
+  double p[5] = {0.023, 0.159, 0.5, .841, .977};
   double qv[5];
     for (int i=0; i<5; i++) {
     qv[i] = p[i]*xvals.size();
@@ -61,11 +66,11 @@ void Brazil() {
     mendezstyle::CenterTitles(hsens);
     hsens->Draw();
     int max = hsens->GetMaximum();
-  /* cout << "Sensitivity Result Ordered Vector Method\n"; */
-  /* cout << "Upper/lower 2 sigma: " << xvals[qv[4]] << " " << xvals[qv[0]] << "\n"; */
-  /* cout << "Upper/lower 1 sigma: " << xvals[qv[3]] << " " << xvals[qv[1]] << "\n"; */
-  /* cout << "Median: " << xvals[qv[2]] << "\n"; */
-  
+  cout << "Sensitivity Result Ordered Vector Method\n";
+  cout << "Upper/lower 2 sigma: " << xvals[qv[4]] << " " << xvals[qv[0]] << "\n";
+  cout << "Upper/lower 1 sigma: " << xvals[qv[3]] << " " << xvals[qv[1]] << "\n";
+  cout << "Median: " << xvals[qv[2]] << "\n";
+
     /* for (int i=0; i<5; i++) { */
   /*   qv[i] = p[i]*xvals.size(); */
   /*   cout << qv[i] << "\n"; */
@@ -139,8 +144,3 @@ void Brazil() {
   /* // cout << xvals.size() << "\n"; */
   /* int qv[5]; */
   /* // 21, 157, 498, 839, 975 */
-
-
-
-
-
